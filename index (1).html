@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sporting Calendar 2026 — Change Protection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --md-primary:#1A73E8;
+  --md-surface:#FFFFFF;
+  --md-surface2:#F8F9FA;
+  --md-surface3:#F1F3F4;
+  --md-on-surface:#202124;
+  --md-on-surface-2:#5F6368;
+  --md-on-surface-3:#80868B;
+  --md-border:#DADCE0;
+  --md-border-light:#E8EAED;
+  --md-chip-bg:#E8F0FE;
+  --md-chip-text:#1A73E8;
+  --font-head:'Google Sans',sans-serif;
+  --font-body:'Roboto',sans-serif;
+  --c-soccer-bg:#E8F5E9;--c-soccer:#1B5E20;--c-soccer-chip:#34A853;
+  --c-nfl-bg:#FBE9E7;--c-nfl:#BF360C;--c-nfl-chip:#EA4335;
+  --c-nba-bg:#E8EAF6;--c-nba:#1A237E;--c-nba-chip:#4285F4;
+  --c-mlb-bg:#E0F2F1;--c-mlb:#004D40;--c-mlb-chip:#0F9D58;
+  --c-racing-bg:#FFF8E1;--c-racing:#E65100;--c-racing-chip:#FBBC04;
+  --c-other-bg:#F3E5F5;--c-other:#4A148C;--c-other-chip:#9C27B0;
+  --c-protect:#EA4335;
+  --today-bg:#E8F0FE;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --md-surface:#1C2128;--md-surface2:#22272E;--md-surface3:#2D333B;
+    --md-on-surface:#ADBAC7;--md-on-surface-2:#768390;--md-on-surface-3:#545D68;
+    --md-border:#373E47;--md-border-light:#2D333B;
+    --md-chip-bg:#1E3A5F;--md-chip-text:#79B8FF;
+    --c-soccer-bg:#1B3A1F;--c-soccer:#81C784;
+    --c-nfl-bg:#3E1A12;--c-nfl:#FF8A65;
+    --c-nba-bg:#1A1F3A;--c-nba:#90CAF9;
+    --c-mlb-bg:#0D2A27;--c-mlb:#80CBC4;
+    --c-racing-bg:#3A2A00;--c-racing:#FFD54F;
+    --c-other-bg:#2A1533;--c-other:#CE93D8;
+    --today-bg:#1E3A5F;
+  }
+}
+body{background:var(--md-surface2);font-family:var(--font-body);color:var(--md-on-surface);min-height:100vh;}
+.app-bar{background:var(--md-primary);padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.app-bar-title{font-family:var(--font-head);font-size:20px;font-weight:500;color:#fff;letter-spacing:0.01em;}
+.app-bar-sub{font-size:12px;color:rgba(255,255,255,0.75);margin-top:2px;}
+.year-badge{background:rgba(255,255,255,0.18);color:#fff;font-family:var(--font-head);font-size:13px;padding:4px 14px;border-radius:20px;font-weight:500;}
+.filter-bar{background:var(--md-surface);border-bottom:1px solid var(--md-border);padding:10px 16px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.filter-label{font-size:11px;font-weight:500;color:var(--md-on-surface-2);text-transform:uppercase;letter-spacing:0.08em;margin-right:4px;font-family:var(--font-head);}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:1.5px solid var(--md-border);background:var(--md-surface);color:var(--md-on-surface-2);font-size:12px;font-family:var(--font-head);font-weight:500;cursor:pointer;transition:all 0.15s;user-select:none;}
+.chip:hover{border-color:var(--md-on-surface-2);}
+.chip .chip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.chip.selected{background:var(--md-chip-bg);color:var(--md-chip-text);border-color:var(--md-primary);}
+.chip.selected.sp-soccer{background:var(--c-soccer-bg);color:var(--c-soccer);border-color:var(--c-soccer-chip);}
+.chip.selected.sp-nfl{background:var(--c-nfl-bg);color:var(--c-nfl);border-color:var(--c-nfl-chip);}
+.chip.selected.sp-nba{background:var(--c-nba-bg);color:var(--c-nba);border-color:var(--c-nba-chip);}
+.chip.selected.sp-mlb{background:var(--c-mlb-bg);color:var(--c-mlb);border-color:var(--c-mlb-chip);}
+.chip.selected.sp-racing{background:var(--c-racing-bg);color:var(--c-racing);border-color:var(--c-racing-chip);}
+.chip.selected.sp-other{background:var(--c-other-bg);color:var(--c-other);border-color:var(--c-other-chip);}
+.cal-wrap{overflow-x:auto;padding:16px;}
+.cal-grid{min-width:960px;background:var(--md-surface);border-radius:12px;border:1px solid var(--md-border);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+.cal-head-row{display:grid;grid-template-columns:48px repeat(12,minmax(0,1fr));background:var(--md-surface3);border-bottom:1.5px solid var(--md-border);}
+.ch{padding:8px 4px;text-align:center;font-family:var(--font-head);font-size:11px;font-weight:500;color:var(--md-on-surface-2);text-transform:uppercase;letter-spacing:0.06em;border-right:1px solid var(--md-border-light);}
+.ch:last-child{border-right:none;}
+.ch.current-month{color:var(--md-primary);font-weight:700;}
+.day-row{display:grid;grid-template-columns:48px repeat(12,minmax(0,1fr));border-bottom:1px solid var(--md-border-light);}
+.day-row:last-child{border-bottom:none;}
+.day-row.today-row{background:var(--today-bg);}
+.day-row:hover{background:var(--md-surface3);}
+.day-label{padding:3px 6px;text-align:right;font-size:11px;font-family:var(--font-head);font-weight:500;color:var(--md-on-surface-3);display:flex;align-items:flex-start;justify-content:flex-end;border-right:1.5px solid var(--md-border);background:var(--md-surface2);}
+.day-label.today-label{color:var(--md-primary);font-weight:700;}
+.day-cell{padding:2px 3px;border-right:1px solid var(--md-border-light);min-height:24px;display:flex;flex-direction:column;gap:2px;}
+.day-cell:last-child{border-right:none;}
+.day-cell.inactive{background:var(--md-surface3);opacity:0.35;}
+.day-cell.today-cell{border-top:2px solid var(--md-primary);}
+.event-tag{border-radius:4px;padding:1px 5px;font-size:9.5px;font-family:var(--font-head);font-weight:500;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:3px;}
+.event-tag.s-soccer{background:var(--c-soccer-bg);color:var(--c-soccer);}
+.event-tag.s-nfl{background:var(--c-nfl-bg);color:var(--c-nfl);}
+.event-tag.s-nba{background:var(--c-nba-bg);color:var(--c-nba);}
+.event-tag.s-mlb{background:var(--c-mlb-bg);color:var(--c-mlb);}
+.event-tag.s-racing{background:var(--c-racing-bg);color:var(--c-racing);}
+.event-tag.s-other{background:var(--c-other-bg);color:var(--c-other);}
+.protect-pip{width:5px;height:5px;border-radius:50%;background:var(--c-protect);flex-shrink:0;}
+.legend-bar{padding:8px 16px 10px;background:var(--md-surface);border-top:1px solid var(--md-border);display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+.leg{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--md-on-surface-2);font-family:var(--font-body);}
+.leg-swatch{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.status-bar{background:var(--md-surface);border-bottom:1px solid var(--md-border);padding:6px 16px;display:flex;align-items:center;gap:8px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#34A853;flex-shrink:0;}
+.status-dot.err{background:#EA4335;}
+.status-dot.warn{background:#FBBC04;}
+.status-text{font-size:11px;color:var(--md-on-surface-2);font-family:monospace;}
+</style>
+</head>
+<body>
+
+<div class="app-bar">
+  <div>
+    <div class="app-bar-title">Sporting calendar 2026</div>
+    <div class="app-bar-sub">Change protection planning — avoid deployments during high-risk windows</div>
+  </div>
+  <div class="year-badge">2026</div>
+</div>
+
+<div class="status-bar">
+  <div class="status-dot warn" id="status-dot"></div>
+  <span class="status-text" id="status-text">Loading...</span>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">Sports</span>
+  <div class="chip selected sp-soccer" data-sport="s-soccer"><span class="chip-dot" style="background:var(--c-soccer-chip)"></span>Soccer</div>
+  <div class="chip selected sp-nfl" data-sport="s-nfl"><span class="chip-dot" style="background:var(--c-nfl-chip)"></span>NFL</div>
+  <div class="chip selected sp-nba" data-sport="s-nba"><span class="chip-dot" style="background:var(--c-nba-chip)"></span>NBA</div>
+  <div class="chip selected sp-mlb" data-sport="s-mlb"><span class="chip-dot" style="background:var(--c-mlb-chip)"></span>MLB</div>
+  <div class="chip selected sp-racing" data-sport="s-racing"><span class="chip-dot" style="background:var(--c-racing-chip)"></span>Horse racing</div>
+  <div class="chip selected sp-other" data-sport="s-other"><span class="chip-dot" style="background:var(--c-other-chip)"></span>Other</div>
+  <div class="chip" data-sport="protect" id="protect-chip" style="border-color:var(--c-protect);color:var(--c-protect);"><span class="chip-dot" style="background:var(--c-protect)"></span>Protect only</div>
+</div>
+
+<div class="cal-wrap">
+  <div class="cal-grid">
+    <div class="cal-head-row" id="head-row"></div>
+    <div id="day-rows"></div>
+  </div>
+</div>
+
+<div class="legend-bar">
+  <span style="font-size:11px;font-weight:500;color:var(--md-on-surface-2);font-family:var(--font-head);margin-right:4px;">Key</span>
+  <div class="leg"><div class="leg-swatch" style="background:var(--c-soccer-bg);border:1px solid var(--c-soccer-chip)"></div>Soccer / football</div>
+  <div class="leg"><div class="leg-swatch" style="background:var(--c-nfl-bg);border:1px solid var(--c-nfl-chip)"></div>NFL</div>
+  <div class="leg"><div class="leg-swatch" style="background:var(--c-nba-bg);border:1px solid var(--c-nba-chip)"></div>NBA</div>
+  <div class="leg"><div class="leg-swatch" style="background:var(--c-mlb-bg);border:1px solid var(--c-mlb-chip)"></div>MLB</div>
+  <div class="leg"><div class="leg-swatch" style="background:var(--c-racing-bg);border:1px solid var(--c-racing-chip)"></div>Horse racing</div>
+  <div class="leg"><div class="leg-swatch" style="background:var(--c-other-bg);border:1px solid var(--c-other-chip)"></div>Other</div>
+  <div class="leg"><div style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--c-protect);"></div>Protect window</div>
+</div>
+
+<script>
+const SHEET_CSV_URL = "YOUR_GOOGLE_SHEET_CSV_URL_HERE";
+
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const TODAY = new Date();
+
+const SPORT_MAP = {
+  "soccer":"s-soccer","football":"s-soccer","nfl":"s-nfl","nba":"s-nba",
+  "mlb":"s-mlb","baseball":"s-mlb","racing":"s-racing","horse racing":"s-racing",
+  "f1":"s-other","motorsport":"s-other","other":"s-other"
+};
+
+const DEFAULT_EVENTS = [
+  {m:1,ds:6,de:22,sport:"s-other",name:"Winter Olympics",protect:true},
+  {m:2,ds:5,de:28,sport:"s-soccer",name:"PL mid-season",protect:false},
+  {m:2,ds:15,de:16,sport:"s-nba",name:"NBA All-Star",protect:false},
+  {m:2,ds:14,de:28,sport:"s-mlb",name:"Spring Training",protect:false},
+  {m:3,ds:4,de:12,sport:"s-soccer",name:"UCL Round of 16",protect:false},
+  {m:3,ds:10,de:13,sport:"s-racing",name:"Cheltenham Festival",protect:true},
+  {m:3,ds:15,de:15,sport:"s-other",name:"F1 season begins",protect:false},
+  {m:3,ds:1,de:31,sport:"s-soccer",name:"PL run-in",protect:false},
+  {m:4,ds:2,de:2,sport:"s-mlb",name:"MLB season begins",protect:false},
+  {m:4,ds:6,de:12,sport:"s-other",name:"The Masters",protect:false},
+  {m:4,ds:7,de:16,sport:"s-soccer",name:"UCL Quarter Finals",protect:false},
+  {m:4,ds:11,de:11,sport:"s-racing",name:"Grand National",protect:true},
+  {m:4,ds:18,de:30,sport:"s-nba",name:"NBA Playoffs",protect:true},
+  {m:5,ds:5,de:14,sport:"s-soccer",name:"UCL Semi Finals",protect:true},
+  {m:5,ds:14,de:14,sport:"s-soccer",name:"UCL Final",protect:true},
+  {m:5,ds:19,de:19,sport:"s-soccer",name:"FA Cup Final",protect:true},
+  {m:5,ds:23,de:23,sport:"s-soccer",name:"PL Final Day",protect:true},
+  {m:5,ds:19,de:31,sport:"s-nba",name:"NBA Conf Finals",protect:false},
+  {m:5,ds:26,de:27,sport:"s-racing",name:"Epsom Derby",protect:true},
+  {m:6,ds:1,de:20,sport:"s-nba",name:"NBA Finals",protect:true},
+  {m:6,ds:3,de:7,sport:"s-racing",name:"Royal Ascot",protect:true},
+  {m:6,ds:11,de:30,sport:"s-soccer",name:"FIFA World Cup",protect:true},
+  {m:6,ds:18,de:18,sport:"s-racing",name:"Irish Derby",protect:false},
+  {m:6,ds:25,de:30,sport:"s-other",name:"Wimbledon",protect:false},
+  {m:7,ds:1,de:5,sport:"s-other",name:"Wimbledon Finals",protect:true},
+  {m:7,ds:9,de:31,sport:"s-nfl",name:"NFL Training Camps",protect:false},
+  {m:7,ds:11,de:26,sport:"s-soccer",name:"World Cup QF–Final",protect:true},
+  {m:7,ds:14,de:19,sport:"s-other",name:"The Open Golf",protect:false},
+  {m:7,ds:19,de:25,sport:"s-racing",name:"Galway Races",protect:false},
+  {m:8,ds:6,de:31,sport:"s-nfl",name:"NFL Preseason",protect:false},
+  {m:8,ds:15,de:15,sport:"s-soccer",name:"PL 26/27 begins",protect:true},
+  {m:8,ds:31,de:31,sport:"s-other",name:"US Open Tennis",protect:false},
+  {m:9,ds:1,de:13,sport:"s-other",name:"US Open Tennis",protect:false},
+  {m:9,ds:10,de:10,sport:"s-nfl",name:"NFL Week 1",protect:true},
+  {m:9,ds:15,de:30,sport:"s-soccer",name:"UCL Group Stage",protect:false},
+  {m:9,ds:18,de:20,sport:"s-other",name:"Ryder Cup",protect:false},
+  {m:9,ds:29,de:30,sport:"s-mlb",name:"MLB Wild Card",protect:false},
+  {m:10,ds:1,de:15,sport:"s-mlb",name:"ALDS / NLDS",protect:false},
+  {m:10,ds:1,de:31,sport:"s-nfl",name:"NFL regular season",protect:false},
+  {m:10,ds:1,de:31,sport:"s-nba",name:"NBA season",protect:false},
+  {m:10,ds:20,de:21,sport:"s-racing",name:"Breeders' Cup",protect:true},
+  {m:10,ds:27,de:31,sport:"s-mlb",name:"World Series",protect:true},
+  {m:11,ds:1,de:1,sport:"s-racing",name:"Cheltenham Nov Mtg",protect:false},
+  {m:11,ds:1,de:30,sport:"s-nfl",name:"NFL regular season",protect:false},
+  {m:11,ds:1,de:30,sport:"s-soccer",name:"UCL Matchdays",protect:false},
+  {m:11,ds:15,de:22,sport:"s-other",name:"ATP Finals",protect:false},
+  {m:12,ds:1,de:31,sport:"s-nfl",name:"NFL playoffs push",protect:false},
+  {m:12,ds:9,de:20,sport:"s-soccer",name:"UCL Matchdays",protect:false},
+  {m:12,ds:19,de:31,sport:"s-other",name:"PDC World Darts",protect:false},
+  {m:12,ds:26,de:28,sport:"s-soccer",name:"PL festive period",protect:true},
+];
+
+let allEvents = [...DEFAULT_EVENTS];
+let selectedSports = new Set(["s-soccer","s-nfl","s-nba","s-mlb","s-racing","s-other"]);
+let protectOnly = false;
+
+function daysInMonth(m){ return new Date(2026, m, 0).getDate(); }
+
+function parseCSV(text){
+  const lines = text.trim().split("\n");
+  if(lines.length < 2) return null;
+  const headers = lines[0].split(",").map(h=>h.trim().replace(/"/g,"").toLowerCase());
+  const events = [];
+  for(let i=1;i<lines.length;i++){
+    const vals = lines[i].match(/(".*?"|[^,\n]+)/g)||[];
+    const row = {};
+    headers.forEach((h,idx)=>{ row[h]=(vals[idx]||"").replace(/"/g,"").trim(); });
+    if(!row.name||!row.month) continue;
+    const sport = SPORT_MAP[(row.sport||"other").toLowerCase()]||"s-other";
+    const ds = parseInt(row.day_start||row.ds||1);
+    const de = parseInt(row.day_end||row.de||daysInMonth(parseInt(row.month)));
+    events.push({m:parseInt(row.month),ds:isNaN(ds)?1:ds,de:isNaN(de)?28:de,sport,name:row.name,protect:["yes","true","1"].includes((row.protect||"").toLowerCase())});
+  }
+  return events.length ? events : null;
+}
+
+async function loadSheet(){
+  if(SHEET_CSV_URL==="YOUR_GOOGLE_SHEET_CSV_URL_HERE"){
+    setStatus("warn","Using built-in defaults — connect a Google Sheet to manage events live");
+    return;
+  }
+  try{
+    const res = await fetch(SHEET_CSV_URL+"&t="+Date.now());
+    if(!res.ok) throw new Error();
+    const parsed = parseCSV(await res.text());
+    if(!parsed) throw new Error();
+    allEvents = parsed;
+    setStatus("ok","Live — Google Sheet · Updated "+new Date().toLocaleTimeString());
+  }catch(e){
+    setStatus("err","Could not load Google Sheet — showing built-in defaults");
+  }
+  buildRows();
+}
+
+function setStatus(type,msg){
+  const dot=document.getElementById("status-dot");
+  const txt=document.getElementById("status-text");
+  dot.className="status-dot"+(type==="err"?" err":type==="warn"?" warn":"");
+  txt.textContent=msg;
+}
+
+function buildHead(){
+  const row=document.getElementById("head-row");
+  row.innerHTML="";
+  const corner=document.createElement("div");
+  corner.className="ch";
+  row.appendChild(corner);
+  MONTHS.forEach((m,i)=>{
+    const ch=document.createElement("div");
+    ch.className="ch"+(i===TODAY.getMonth()?" current-month":"");
+    ch.textContent=m;
+    row.appendChild(ch);
+  });
+}
+
+function buildRows(){
+  const container=document.getElementById("day-rows");
+  container.innerHTML="";
+  for(let day=1;day<=31;day++){
+    const row=document.createElement("div");
+    row.className="day-row";
+    let isToday=false;
+    const dl=document.createElement("div");
+    dl.className="day-label";
+    dl.textContent=day;
+    row.appendChild(dl);
+    for(let mi=1;mi<=12;mi++){
+      const cell=document.createElement("div");
+      cell.className="day-cell";
+      if(day>daysInMonth(mi)){
+        cell.classList.add("inactive");
+      } else {
+        if(TODAY.getFullYear()===2026&&TODAY.getMonth()+1===mi&&TODAY.getDate()===day){
+          isToday=true;
+          dl.classList.add("today-label");
+          cell.classList.add("today-cell");
+        }
+        const seen=new Set();
+        allEvents
+          .filter(e=>e.m===mi&&day>=e.ds&&day<=e.de&&selectedSports.has(e.sport)&&(!protectOnly||e.protect))
+          .forEach(ev=>{
+            const key=ev.name+ev.sport;
+            if(seen.has(key)) return;
+            seen.add(key);
+            const tag=document.createElement("div");
+            tag.className="event-tag "+ev.sport;
+            tag.title=ev.name+(ev.protect?" — Protect window":"");
+            if(ev.protect){const pip=document.createElement("span");pip.className="protect-pip";tag.appendChild(pip);}
+            tag.appendChild(document.createTextNode(ev.name));
+            cell.appendChild(tag);
+          });
+      }
+      row.appendChild(cell);
+    }
+    if(isToday) row.classList.add("today-row");
+    container.appendChild(row);
+  }
+}
+
+buildHead();
+buildRows();
+loadSheet();
+setInterval(loadSheet, 5*60*1000);
+
+document.querySelector(".filter-bar").addEventListener("click",e=>{
+  const chip=e.target.closest(".chip");
+  if(!chip) return;
+  const sport=chip.dataset.sport;
+  if(sport==="protect"){
+    protectOnly=!protectOnly;
+    chip.classList.toggle("selected",protectOnly);
+    chip.style.background=protectOnly?"rgba(234,67,53,0.1)":"";
+  } else {
+    if(selectedSports.has(sport)){selectedSports.delete(sport);chip.classList.remove("selected");}
+    else{selectedSports.add(sport);chip.classList.add("selected");}
+  }
+  buildRows();
+});
+</script>
+</body>
+</html>
