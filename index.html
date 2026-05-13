@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sporting Calendar 2026 — Change Protection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #181818;
+    --surface2: #222222;
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.15);
+    --text: #f0ede8;
+    --text-muted: #888;
+    --text-dim: #555;
+    --soccer: #1a6b3c;
+    --soccer-text: #6fe0a0;
+    --nfl: #7a2a1a;
+    --nfl-text: #f4a07a;
+    --nba: #1a2a6b;
+    --nba-text: #7aaaf4;
+    --mlb: #1a4a1a;
+    --mlb-text: #7ad07a;
+    --racing: #5a3a10;
+    --racing-text: #e0b060;
+    --f1: #6b1a1a;
+    --f1-text: #f47a7a;
+    --other: #2a2a2a;
+    --other-text: #aaa;
+    --protect: #e24b4a;
+    --protect-bg: rgba(226,75,74,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; min-height: 100vh; }
+
+  header { padding: 2rem 2rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .header-left h1 { font-size: 22px; font-weight: 500; letter-spacing: -0.02em; }
+  .header-left p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  #last-updated { font-size: 11px; color: var(--text-dim); font-family: 'DM Mono', monospace; }
+  #status-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-family: 'DM Mono', monospace; }
+  .status-ok { background: rgba(111,224,160,0.1); color: #6fe0a0; border: 1px solid rgba(111,224,160,0.2); }
+  .status-err { background: rgba(226,75,74,0.1); color: #f47a7a; border: 1px solid rgba(226,75,74,0.2); }
+  .status-loading { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); }
+
+  .controls { padding: 1rem 2rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-bottom: 1px solid var(--border); }
+  .filter-btn { padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-muted); font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
+  .filter-btn:hover { border-color: rgba(255,255,255,0.3); color: var(--text); }
+  .filter-btn.active { background: var(--surface2); color: var(--text); border-color: rgba(255,255,255,0.3); }
+  .filter-btn.protect-filter.active { background: var(--protect-bg); color: var(--protect); border-color: rgba(226,75,74,0.4); }
+  .controls-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+  .legend { padding: 0.75rem 2rem; display: flex; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--border); }
+  .leg { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
+  .leg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+  .calendar { padding: 1.5rem 2rem 3rem; overflow-x: auto; }
+  .cal-grid { display: grid; grid-template-columns: 52px repeat(6, minmax(0, 1fr)); min-width: 700px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+
+  .gh { background: var(--surface2); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); padding: 8px 6px; font-size: 10px; font-weight: 500; color: var(--text-dim); text-align: center; text-transform: uppercase; letter-spacing: 0.06em; }
+  .gh:last-child { border-right: none; }
+
+  .mc { background: var(--surface); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; padding: 6px 2px; }
+  .mc:last-of-type { border-bottom: none; }
+  .month-name { font-size: 10px; font-weight: 500; color: var(--text-muted); writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  .ec { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 6px 5px; min-height: 72px; vertical-align: top; display: flex; flex-direction: column; gap: 3px; }
+  .ec:last-child { border-right: none; }
+  .last-row .ec, .last-row .mc { border-bottom: none; }
+
+  .pill { border-radius: 3px; padding: 3px 5px; font-size: 10.5px; line-height: 1.3; transition: opacity 0.15s; }
+  .pill .pname { font-weight: 500; display: block; }
+  .pill .pdates { opacity: 0.7; display: block; font-family: 'DM Mono', monospace; font-size: 9.5px; margin-top: 1px; }
+  .pill-wrap { display: flex; gap: 3px; align-items: flex-start; }
+  .protect-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--protect); flex-shrink: 0; margin-top: 4px; }
+
+  .pill.s-soccer { background: var(--soccer); color: var(--soccer-text); }
+  .pill.s-nfl    { background: var(--nfl);    color: var(--nfl-text); }
+  .pill.s-nba    { background: var(--nba);    color: var(--nba-text); }
+  .pill.s-mlb    { background: var(--mlb);    color: var(--mlb-text); }
+  .pill.s-racing { background: var(--racing); color: var(--racing-text); }
+  .pill.s-f1     { background: var(--f1);     color: var(--f1-text); }
+  .pill.s-other  { background: var(--other);  color: var(--other-text); }
+
+  .pill.dimmed { opacity: 0.18; }
+
+  .empty-state { padding: 3rem; text-align: center; color: var(--text-dim); font-size: 13px; grid-column: 1/-1; }
+
+  .loading-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; z-index: 99; transition: opacity 0.4s; }
+  .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+  .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--text-muted); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 13px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+
+  .sheet-config { padding: 1rem 2rem; background: rgba(226,75,74,0.06); border-bottom: 1px solid rgba(226,75,74,0.15); display: none; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .sheet-config.visible { display: flex; }
+  .sheet-config p { font-size: 13px; color: #f47a7a; }
+  .sheet-config a { color: #f4a07a; }
+
+  @media (max-width: 600px) {
+    header, .controls, .legend, .calendar { padding-left: 1rem; padding-right: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loader">
+  <div class="spinner"></div>
+  <div class="loading-text">Loading fixtures...</div>
+</div>
+
+<header>
+  <div class="header-left">
+    <h1>Sporting calendar 2026</h1>
+    <p>Change protection planning — avoid deployments during high-risk sporting windows</p>
+  </div>
+  <div class="header-right">
+    <span id="status-badge" class="status-loading">Loading...</span>
+    <span id="last-updated"></span>
+  </div>
+</header>
+
+<div class="sheet-config" id="sheet-config">
+  <p>⚠ No Google Sheet connected yet. <a href="#" id="setup-link">See setup instructions</a> or events are loaded from the built-in defaults below.</p>
+</div>
+
+<div class="controls" id="controls">
+  <button class="filter-btn active" data-filter="all">All sports</button>
+  <div class="controls-sep"></div>
+  <button class="filter-btn" data-filter="s-soccer">Soccer</button>
+  <button class="filter-btn" data-filter="s-nfl">NFL</button>
+  <button class="filter-btn" data-filter="s-nba">NBA</button>
+  <button class="filter-btn" data-filter="s-mlb">MLB</button>
+  <button class="filter-btn" data-filter="s-racing">Horse racing</button>
+  <button class="filter-btn" data-filter="s-f1">F1</button>
+  <button class="filter-btn" data-filter="s-other">Other</button>
+  <div class="controls-sep"></div>
+  <button class="filter-btn protect-filter" data-filter="protect">⚠ Protect only</button>
+</div>
+
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:var(--soccer)"></div>Soccer / football</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--nfl)"></div>NFL</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--nba)"></div>NBA</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--mlb)"></div>MLB</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--racing)"></div>Horse racing</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--f1)"></div>F1 / motorsport</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--other)"></div>Other</div>
+  <div class="leg"><div class="protect-dot" style="width:8px;height:8px;border-radius:2px;background:var(--protect);display:inline-block;"></div>Protect window</div>
+</div>
+
+<div class="calendar">
+  <div class="cal-grid" id="cal-grid"></div>
+</div>
+
+<script>
+const SHEET_CSV_URL = "YOUR_GOOGLE_SHEET_CSV_URL_HERE";
+
+const COL_HEADERS = ["Soccer / football", "NFL", "NBA", "MLB", "Horse racing", "F1 / Other"];
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+const SPORT_MAP = {
+  "soccer": "s-soccer",
+  "football": "s-soccer",
+  "nfl": "s-nfl",
+  "nba": "s-nba",
+  "mlb": "s-mlb",
+  "racing": "s-racing",
+  "horse racing": "s-racing",
+  "f1": "s-f1",
+  "motorsport": "s-f1",
+  "other": "s-other",
+};
+
+const COL_MAP = {
+  "s-soccer": 0,
+  "s-nfl": 1,
+  "s-nba": 2,
+  "s-mlb": 3,
+  "s-racing": 4,
+  "s-f1": 5,
+  "s-other": 5,
+};
+
+const DEFAULT_EVENTS = [
+  {month:2,sport:"s-soccer",name:"PL mid-season",dates:"ongoing",protect:false},
+  {month:2,sport:"s-nba",name:"NBA All-Star",dates:"15–16",protect:false},
+  {month:2,sport:"s-mlb",name:"Spring Training",dates:"from 14",protect:false},
+  {month:2,sport:"s-other",name:"Winter Olympics",dates:"6–22",protect:true},
+  {month:3,sport:"s-racing",name:"Cheltenham Festival",dates:"10–13",protect:true},
+  {month:3,sport:"s-soccer",name:"UCL Round of 16",dates:"4–12",protect:false},
+  {month:3,sport:"s-f1",name:"F1 season begins",dates:"15",protect:false},
+  {month:4,sport:"s-soccer",name:"UCL Quarter Finals",dates:"7–16",protect:false},
+  {month:4,sport:"s-nba",name:"NBA Playoffs begin",dates:"18",protect:true},
+  {month:4,sport:"s-mlb",name:"MLB season begins",dates:"2",protect:false},
+  {month:4,sport:"s-racing",name:"Grand National",dates:"11",protect:true},
+  {month:4,sport:"s-other",name:"The Masters",dates:"6–12",protect:false},
+  {month:5,sport:"s-soccer",name:"UCL Semi Finals",dates:"5–14",protect:true},
+  {month:5,sport:"s-soccer",name:"FA Cup Final",dates:"19",protect:true},
+  {month:5,sport:"s-soccer",name:"UCL Final",dates:"14",protect:true},
+  {month:5,sport:"s-soccer",name:"PL Final Day",dates:"23",protect:true},
+  {month:5,sport:"s-nba",name:"NBA Conf Finals",dates:"19–",protect:false},
+  {month:5,sport:"s-racing",name:"Epsom Derby",dates:"26–27",protect:true},
+  {month:6,sport:"s-soccer",name:"FIFA World Cup begins",dates:"11",protect:true},
+  {month:6,sport:"s-nba",name:"NBA Finals",dates:"1–",protect:true},
+  {month:6,sport:"s-racing",name:"Royal Ascot",dates:"3–7",protect:true},
+  {month:6,sport:"s-racing",name:"Irish Derby",dates:"18",protect:false},
+  {month:6,sport:"s-other",name:"Wimbledon begins",dates:"25",protect:false},
+  {month:7,sport:"s-soccer",name:"World Cup QF/SF/Final",dates:"11–26",protect:true},
+  {month:7,sport:"s-nfl",name:"NFL Training Camps",dates:"from 9",protect:false},
+  {month:7,sport:"s-racing",name:"Galway Races",dates:"19–25",protect:false},
+  {month:7,sport:"s-other",name:"Wimbledon Finals",dates:"5",protect:true},
+  {month:7,sport:"s-other",name:"The Open (Golf)",dates:"14–19",protect:false},
+  {month:8,sport:"s-soccer",name:"PL 26/27 begins",dates:"15",protect:true},
+  {month:8,sport:"s-nfl",name:"NFL Preseason",dates:"from 6",protect:false},
+  {month:8,sport:"s-other",name:"US Open Tennis",dates:"31–",protect:false},
+  {month:9,sport:"s-soccer",name:"UCL Group Stage",dates:"from 15",protect:false},
+  {month:9,sport:"s-nfl",name:"NFL Week 1",dates:"10",protect:true},
+  {month:9,sport:"s-mlb",name:"MLB Wild Card",dates:"29–",protect:false},
+  {month:9,sport:"s-other",name:"Ryder Cup",dates:"18–20",protect:false},
+  {month:10,sport:"s-nfl",name:"NFL marquee wknds",dates:"ongoing",protect:false},
+  {month:10,sport:"s-nba",name:"NBA season begins",dates:"TBA",protect:false},
+  {month:10,sport:"s-mlb",name:"World Series",dates:"27",protect:true},
+  {month:10,sport:"s-racing",name:"Breeders' Cup",dates:"TBA",protect:true},
+  {month:11,sport:"s-soccer",name:"UCL Matchdays",dates:"ongoing",protect:false},
+  {month:11,sport:"s-nfl",name:"NFL trade week",dates:"wk 9",protect:false},
+  {month:11,sport:"s-racing",name:"Cheltenham Nov Mtg",dates:"1",protect:false},
+  {month:11,sport:"s-other",name:"ATP Finals",dates:"TBA",protect:false},
+  {month:12,sport:"s-soccer",name:"PL festive period",dates:"26–28",protect:true},
+  {month:12,sport:"s-nfl",name:"NFL playoffs push",dates:"ongoing",protect:false},
+  {month:12,sport:"s-other",name:"PDC World Darts",dates:"from 19",protect:false},
+];
+
+let allEvents = [];
+let activeFilter = "all";
+
+function parseCSV(text) {
+  const lines = text.trim().split("\n");
+  if (lines.length < 2) return null;
+  const headers = lines[0].split(",").map(h => h.trim().replace(/"/g,"").toLowerCase());
+  const events = [];
+  for (let i = 1; i < lines.length; i++) {
+    const vals = lines[i].match(/(".*?"|[^,]+)(?=,|$)/g) || [];
+    const row = {};
+    headers.forEach((h, idx) => { row[h] = (vals[idx] || "").replace(/"/g,"").trim(); });
+    if (!row.name || !row.month) continue;
+    const sportKey = (row.sport || "other").toLowerCase();
+    const sportClass = SPORT_MAP[sportKey] || "s-other";
+    events.push({
+      month: parseInt(row.month),
+      sport: sportClass,
+      name: row.name,
+      dates: row.dates || "",
+      protect: (row.protect || "").toLowerCase() === "yes" || (row.protect || "").toLowerCase() === "true",
+    });
+  }
+  return events.length ? events : null;
+}
+
+async function loadEvents() {
+  if (SHEET_CSV_URL === "YOUR_GOOGLE_SHEET_CSV_URL_HERE") {
+    document.getElementById("sheet-config").classList.add("visible");
+    return DEFAULT_EVENTS;
+  }
+  try {
+    const res = await fetch(SHEET_CSV_URL);
+    if (!res.ok) throw new Error("fetch failed");
+    const text = await res.text();
+    const parsed = parseCSV(text);
+    if (!parsed) throw new Error("parse failed");
+    document.getElementById("status-badge").textContent = "Live — Google Sheet";
+    document.getElementById("status-badge").className = "status-ok";
+    document.getElementById("last-updated").textContent = "Updated " + new Date().toLocaleTimeString();
+    return parsed;
+  } catch(e) {
+    document.getElementById("status-badge").textContent = "Sheet error — using defaults";
+    document.getElementById("status-badge").className = "status-err";
+    document.getElementById("sheet-config").classList.add("visible");
+    return DEFAULT_EVENTS;
+  }
+}
+
+function buildGrid(events) {
+  const grid = document.getElementById("cal-grid");
+  grid.innerHTML = "";
+
+  const blank = document.createElement("div");
+  blank.className = "gh";
+  grid.appendChild(blank);
+  COL_HEADERS.forEach(h => {
+    const gh = document.createElement("div");
+    gh.className = "gh";
+    gh.textContent = h;
+    grid.appendChild(gh);
+  });
+
+  for (let m = 1; m <= 12; m++) {
+    const isLast = m === 12;
+    const monthEvents = events.filter(e => e.month === m);
+
+    const filterOk = (e) => {
+      if (activeFilter === "all") return true;
+      if (activeFilter === "protect") return e.protect;
+      return e.sport === activeFilter;
+    };
+
+    const mc = document.createElement("div");
+    mc.className = "mc" + (isLast ? " last-row" : "");
+    mc.innerHTML = `<div class="month-name">${MONTHS[m-1]}</div>`;
+    grid.appendChild(mc);
+
+    for (let c = 0; c < 6; c++) {
+      const cell = document.createElement("div");
+      cell.className = "ec" + (isLast ? " last-row" : "");
+      if (c === 5) cell.style.borderRight = "none";
+
+      const colEvents = monthEvents.filter(e => COL_MAP[e.sport] === c);
+      colEvents.forEach(ev => {
+        const matches = filterOk(ev);
+        const wrap = document.createElement("div");
+        wrap.className = "pill-wrap";
+        if (ev.protect) {
+          const dot = document.createElement("div");
+          dot.className = "protect-dot";
+          wrap.appendChild(dot);
+        }
+        const pill = document.createElement("div");
+        pill.className = `pill ${ev.sport}${!matches ? " dimmed" : ""}`;
+        pill.innerHTML = `<span class="pname">${ev.name}</span><span class="pdates">${ev.dates}</span>`;
+        wrap.appendChild(pill);
+        cell.appendChild(wrap);
+      });
+      grid.appendChild(cell);
+    }
+  }
+}
+
+async function init() {
+  allEvents = await loadEvents();
+  buildGrid(allEvents);
+  document.getElementById("loader").classList.add("hidden");
+  if (SHEET_CSV_URL !== "YOUR_GOOGLE_SHEET_CSV_URL_HERE") {
+    document.getElementById("status-badge").textContent = "Live — Google Sheet";
+    document.getElementById("status-badge").className = "status-ok";
+    document.getElementById("last-updated").textContent = "Updated " + new Date().toLocaleTimeString();
+  } else {
+    document.getElementById("status-badge").textContent = "Default data";
+    document.getElementById("status-badge").className = "status-loading";
+  }
+}
+
+document.getElementById("controls").addEventListener("click", e => {
+  const btn = e.target.closest(".filter-btn");
+  if (!btn) return;
+  activeFilter = btn.dataset.filter;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  buildGrid(allEvents);
+});
+
+init();
+setInterval(async () => {
+  if (SHEET_CSV_URL !== "YOUR_GOOGLE_SHEET_CSV_URL_HERE") {
+    allEvents = await loadEvents();
+    buildGrid(allEvents);
+  }
+}, 5 * 60 * 1000);
+</script>
+</body>
+</html>
